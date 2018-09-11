@@ -1,40 +1,51 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { map } from 'rxjs/operators';
+import { HttpClient, HttpRequest } from '@angular/common/http';
+
 import { RecipeService } from '../recipes/recipe.service';
 import { Recipe } from '../recipes/recipe.model';
-import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class DataStorageService {
   private databaseUrl = environment.firebaseDatabaseURL;
   private recipeJson = 'recipe.json';
 
-  constructor( private http: Http, private recipeService: RecipeService, private authService: AuthService ) {
+  constructor( private httpClient: HttpClient, private recipeService: RecipeService ) {
   }
 
   storeRecipes() {
-    const token = this.authService.getToken();
+    // return this.httpClient.put( this.databaseUrl + this.recipeJson, this.recipeService.getRecipes(), {
+    //   // observe: 'events'
+    //   // headers: new HttpHeaders().set( 'Authorization', 'add token' ).append( 'A', 'B' )
+    //   params: new HttpParams().set( 'auth', token )
+    // } );
+    const req = new HttpRequest( 'PUT', this.databaseUrl, this.recipeService.getRecipes(), {
+      reportProgress: true,
+    } );
 
-    return this.http.put( this.databaseUrl + this.recipeJson + '?auth=' + token, this.recipeService.getRecipes() );
+    // loaded/total in the reportProgress could be displayed to the user
+
+    return this.httpClient.request( req );
   }
 
   getRecipes() {
-    const token = this.authService.getToken();
 
-    this.http.get( this.databaseUrl + this.recipeJson + '?auth=' + token ).pipe( map(
-      ( response: Response ) => {
-        const recipes: Recipe[] = response.json();
-        for ( const recipe of recipes ) {
-          if ( !recipe[ 'ingredients' ] ) {
-            console.log( recipe );
-            recipe[ 'ingredients' ] = [];
+    this.httpClient.get<Recipe[]>( this.databaseUrl + this.recipeJson )
+    // this.httpClient.get( this.databaseUrl + this.recipeJson + '?auth=' + token, {
+    //   observe: 'response', could also be body
+    //   responseType: 'text' could also be blob, arraybuffer, json (default)
+    // } )
+      .pipe( map(
+        ( recipes ) => {
+          for ( const recipe of recipes ) {
+            if ( !recipe[ 'ingredients' ] ) {
+              recipe[ 'ingredients' ] = [];
+            }
           }
+          return recipes;
         }
-        return recipes;
-      }
-    ) ).subscribe(
+      ) ).subscribe(
       ( recipes: Recipe[] ) => {
         this.recipeService.setRecipes( recipes );
       }

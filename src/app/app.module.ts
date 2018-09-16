@@ -22,7 +22,7 @@ import { AuthEffects } from './auth/store/auth.effects';
     AppComponent
   ],
   imports: [
-    BrowserModule.withServerTransition( { appId: 'my-first-app' } ),
+    BrowserModule.withServerTransition( { appId: 'recipe-book' } ),
     FormsModule,
     // HttpModule,
     HttpClientModule,

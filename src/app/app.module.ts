@@ -6,6 +6,7 @@ import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreRouterConnectingModule } from '@ngrx/router-store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
@@ -36,7 +37,8 @@ import { AuthEffects } from './auth/store/auth.effects';
     EffectsModule.forRoot( [ AuthEffects ] ),
     StoreRouterConnectingModule,
     // Must be added after StoreModule
-    !environment.production ? StoreDevtoolsModule.instrument() : []
+    !environment.production ? StoreDevtoolsModule.instrument() : [],
+    BrowserAnimationsModule
   ],
   bootstrap: [ AppComponent ]
 } )
